@@ -1,0 +1,5 @@
+bump:
+  recurse: false
+  file: 'lib/solidus_back_in_stock/version.rb'
+  message: Bump SolidusBackInStock to %{version}
+  tag: true
