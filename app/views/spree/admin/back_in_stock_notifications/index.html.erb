@@ -1,0 +1,69 @@
+
+<% admin_breadcrumb(link_to "Back in stock notifications", spree.admin_back_in_stock_notifications_path) %>
+
+<% content_for :page_actions do %>
+  <% if false #can?(:create, Spree::BackInStockNotification) %>
+    <li id="new_ot_link">
+      <%= link_to_with_icon 'plus',
+        t('spree.new_back_in_stock_notification', default: "New Back in Stock Notification"),
+        new_admin_back_in_stock_notification_url,
+        remote: true, id: 'new_back_in_stock_notification_link',
+        class: 'btn btn-primary'
+      %>
+    </li>
+  <% end %>
+<% end %>
+
+<div id="new_back_in_stock_notification"></div>
+
+<% if @back_in_stock_notifications.any? %>
+
+
+  <table class="index" id="listing_back_in_stock_notifications">
+    <thead>
+      <tr data-hook="back_in_stock_notification_header">
+        <th><%= Spree::BackInStockNotification.human_attribute_name(:email) %></th>
+        <th><%=t "spree.product" %></th>
+        <th><%= "SKU" %></th>
+        <th><%=t "spree.language" %></th>
+        <th><%=t "spree.stock" %></th>
+        <th><%=t "spree.location" %></th>
+        <th><%=t "spree.email_sent" %></th>
+        <th class="actions"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @back_in_stock_notifications.each do |bisn| %>
+        <tr class="spree_back_in_stock_notification" id="<%= spree_dom_id bisn %>" data-hook="back_in_stock_notification_row">
+          <td>
+            <%= link_to_if (bisn.user && can?(:idit, bisn.user)), bisn.email, admin_user_path(bisn.user || '') %>
+          </td>
+          <td><%= link_to_if can?(:edit, bisn.product), "#{bisn.variant.name} - #{bisn.label}", spree.edit_admin_product_path(bisn.product) %></td>
+          <td><%= link_to_if can?(:edit, bisn.variant), bisn.variant.sku, spree.edit_admin_product_variant_path(bisn.product, bisn.variant) %></td>
+          <td><%= bisn.locale %></td>
+          <td><%= bisn.stock_count %></td>
+          <td><%= link_to bisn.stock_location.name, spree.edit_admin_stock_location_path(bisn.stock_location) %></td>
+          <td><%= bisn.email_sent_at || "-" %></td>
+
+          <td class="actions">
+            <% if false #can?(:update, bisn) %>
+              <%= link_to_edit(bisn, class: 'admin_edit_back_in_stock_notification', no_text: true) %>
+            <% end %>
+            <% if can?(:destroy, bisn) %>
+              <%= link_to_delete(bisn, no_text: true) %>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= paginate @back_in_stock_notifications %>
+<% else %>
+  <div class="no-objects-found">
+    No Back in stock notification found.
+    <%#= render 'spree/admin/shared/no_objects_found',
+                 resource: Spree::BackInStockNotification,
+                 new_resource_url: new_object_url %>
+  </div>
+<% end %>
