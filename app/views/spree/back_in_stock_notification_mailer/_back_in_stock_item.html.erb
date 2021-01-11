@@ -1,0 +1,50 @@
+<table border="0" cellpadding="0" cellspacing="0"width="100%">
+  <tbody>
+    <tr>
+      <td valign="top" style="padding:0 9px;">
+        <table align="left" border="0" cellpadding="0" cellspacing="0" width="264">
+          <tbody>
+            <tr>
+              <td align="center" valign="top">
+                <img
+                  src="<%= product_image_link %>"
+                  alt=""
+                  width="264"
+                  style="max-width:940px;"
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table align="right" border="0" cellpadding="0" cellspacing="0" width="264">
+          <tbody>
+            <tr>
+              <td valign="top">
+                <div style="text-align: left;">
+                  <span style="font-size:14px">
+                    <span style="font-family:arial,helvetica neue,helvetica,sans-serif">
+                      <strong><%= bisn.label %></strong> <%= bisn.variant.name %>
+                    </span>
+                  </span>
+                  <br>
+                  <span style="font-size:14px">
+                    <strong>Price: </strong><%= bisn.variant.price_in(currency).display_price %>
+                  </span>
+                  <div>
+                    <%= link_to product_link, title: t("spree.back_in_stock.email.go_to_product"), target: :_blank do %>
+                      <div style="background-color: #000000;display:inline-block;padding:10px 16px 6px;">
+                        <div style="color:#FFFFFF;font-size:14px;font-weight: bold;">
+                          <%= t("spree.back_in_stock.email.go_to_product") %>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
