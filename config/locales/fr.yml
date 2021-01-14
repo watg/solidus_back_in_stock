@@ -1,4 +1,4 @@
-en:
+fr:
   activerecord:
     attributes:
       spree/back_in_stock_notification:
@@ -8,9 +8,9 @@ en:
         spree/back_in_stock_notification:
           attributes:
             variant:
-              taken: You have already registered
+              taken: Vous vous êtes déjà inscrit
   spree:
     back_in_stock:
       email:
-        subject: Back In Stock!
-        go_to_product: SHOP NOW
+        subject: A Nouveau en Stock!
+        go_to_product: JE COMMANDE
