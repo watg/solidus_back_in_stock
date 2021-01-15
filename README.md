@@ -1,9 +1,8 @@
 # Solidus Back In Stock
 
-[![CircleCI](https://circleci.com/gh/watg/watg-solidus.svg?style=shield)](https://circleci.com/gh/watg/watg-solidus)
-[![codecov](https://codecov.io/gh/watg/watg-solidus/branch/master/graph/badge.svg)](https://codecov.io/gh/watg/watg-solidus)
+[![CircleCI](https://circleci.com/gh/watg/solidus_back_in_stock.svg?style=shield)](https://circleci.com/gh/watg/solidus_back_in_stock)
 
-Add a route for back in stock notification subscriptions to be collected from the FE (TODO example will be provided). 
+Add a route for back in stock notification subscriptions to be collected from the FE (TODO example will be provided).
 These are saved in a list visible here: `/admin/back_in_stock_notifications`. A Sidekiq job is then used to check
 for when items are back in stock and send out an email notification via Mandrill.
 
