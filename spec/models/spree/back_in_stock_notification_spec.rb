@@ -152,4 +152,196 @@ RSpec.describe Spree::BackInStockNotification do
       it { is_expected.to eq false }
     end
   end
+
+  describe ".emails_of_ready_to_send" do
+    subject { described_class.emails_of_ready_to_send(stock_location) }
+
+    context "when there are no pending notifications" do
+      let!(:bisn) { create(:back_in_stock_notification, email_sent_at: 1.hour.ago) }
+      let(:stock_location) { bisn.variant.stock_items.first.stock_location }
+
+      it { is_expected.to eq([]) }
+    end
+
+    context "with two pending notifications in different stock locations" do
+      let(:email_1) { "email_1@domain.com" }
+      let(:email_2) { "email_2@domain.com" }
+
+      let!(:stock_location_1) { create(:stock_location) }
+      let!(:stock_location_2) { create(:stock_location) }
+
+      let!(:variant_1) { create(:variant) }
+      let!(:variant_2) { create(:variant) }
+
+      let!(:stock_item_1) do
+        variant_1.stock_items.find_by(stock_location: stock_location_1) ||
+        create(:stock_item, variant: variant_1, stock_location: stock_location_1)
+      end
+      let!(:stock_item_2) do
+        variant_2.stock_items.find_by(stock_location: stock_location_2) ||
+        create(:stock_item, variant: variant_2, stock_location: stock_location_2)
+      end
+
+      let!(:bisn_1) do
+        create(:back_in_stock_notification,
+          email: email_1,
+          variant: variant_1,
+          stock_location: stock_location_1)
+      end
+
+      let!(:bisn_2) do
+        create(:back_in_stock_notification,
+          email: email_2,
+          variant: variant_2,
+          stock_location: stock_location_2)
+      end
+
+      context "request for location 1" do
+        let(:stock_location) { stock_location_1 }
+
+        context "variant is in stock" do
+          before do
+            stock_item_1.update_columns(
+              count_on_hand: 10,
+              backorderable: false,
+              stock_location_id: stock_location_1.id
+            )
+          end
+
+          it { is_expected.to eq [email_1] }
+        end
+
+        context "variant is out of stock" do
+          before do
+            stock_item_1.update_columns(
+              count_on_hand: 0,
+              backorderable: false,
+              stock_location_id: stock_location_1.id
+            )
+          end
+
+          it { is_expected.to eq [] }
+        end
+      end
+
+      context "request for location 2" do
+        let(:stock_location) { stock_location_2 }
+
+        context "variant is in stock" do
+          before do
+            stock_item_2.update_columns(
+              count_on_hand: 10,
+              backorderable: false,
+              stock_location_id: stock_location_2.id
+            )
+          end
+
+          it { is_expected.to eq [email_2] }
+        end
+
+        context "variant is out of stock" do
+          before do
+            stock_item_2.update_columns(
+              count_on_hand: 0,
+              backorderable: false,
+              stock_location_id: stock_location_2.id
+            )
+          end
+
+          it { is_expected.to eq [] }
+        end
+      end
+    end
+  end
+
+  describe ".ready_to_send_by_email" do
+    subject { described_class.ready_to_send_by_email(email, stock_location) }
+    let!(:variant_1) { create(:variant) }
+    let!(:variant_2) { create(:variant) }
+
+    context "two pending stock notifications" do
+      let!(:bisn_1) do
+        create(:back_in_stock_notification,
+          email: email_1,
+          variant: variant_1,
+          stock_location: stock_location_1)
+      end
+
+      let!(:bisn_2) do
+        create(:back_in_stock_notification,
+          email: email_2,
+          variant: variant_2,
+          stock_location: stock_location_2)
+      end
+
+      context "both with matching email and stock location" do
+        let(:email) { "user@email.com" }
+        let(:email_1) { email }
+        let(:email_2) { email }
+        let!(:stock_location) { create(:stock_location) }
+        let!(:stock_location_1) { stock_location }
+        let!(:stock_location_2) { stock_location }
+
+        let!(:stock_item_1) do
+          variant_1.stock_items.find_by(stock_location: stock_location_1) ||
+          create(:stock_item, variant: variant_1, stock_location: stock_location_1)
+        end
+        let!(:stock_item_2) do
+          variant_2.stock_items.find_by(stock_location: stock_location_2) ||
+          create(:stock_item, variant: variant_2, stock_location: stock_location_2)
+        end
+
+        it "returns both the notifications" do
+          expect( subject.map(&:id) ).to match_array([bisn_1.id, bisn_2.id])
+        end
+      end
+
+      context "when one has a different email but same stock location" do
+        let(:email) { "user_1@email.com" }
+        let(:email_1) { email }
+        let(:email_2) { "user_2@email.com" }
+        let!(:stock_location) { create(:stock_location) }
+        let!(:stock_location_1) { stock_location }
+        let!(:stock_location_2) { stock_location }
+
+        let!(:stock_item_1) do
+          variant_1.stock_items.find_by(stock_location: stock_location_1) ||
+          create(:stock_item, variant: variant_1, stock_location: stock_location_1)
+        end
+        let!(:stock_item_2) do
+          variant_2.stock_items.find_by(stock_location: stock_location_2) ||
+          create(:stock_item, variant: variant_2, stock_location: stock_location_2)
+        end
+
+        it "returns the expected notification" do
+          expect( subject.map(&:id) ).to eq [bisn_1.id]
+        end
+      end
+
+      context "when one has a different stock location but same email" do
+        # Just for consistency - usually people would not request from separate stock
+        # locations but it is awkward to bundle them together. This test just confirms
+        # that they are handled separately
+        let(:email) { "user@email.com" }
+        let(:email_1) { email }
+        let(:email_2) { email }
+        let!(:stock_location) { create(:stock_location) }
+        let!(:stock_location_1) { stock_location }
+        let!(:stock_location_2) { create(:stock_location) }
+
+        let!(:stock_item_1) do
+          variant_1.stock_items.find_by(stock_location: stock_location_1) ||
+          create(:stock_item, variant: variant_1, stock_location: stock_location_1)
+        end
+        let!(:stock_item_2) do
+          variant_2.stock_items.find_by(stock_location: stock_location_2) ||
+          create(:stock_item, variant: variant_2, stock_location: stock_location_2)
+        end
+
+        it "returns the expected notification" do
+          expect( subject.map(&:id) ).to eq [bisn_1.id]
+        end
+      end
+    end
+  end
 end

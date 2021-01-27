@@ -8,6 +8,7 @@ describe BackInStockNotificationEmailJob do
 
     context "with one pending stock notification" do
       let!(:bisn) { create(:back_in_stock_notification) }
+      let(:stock_location) { bisn.stock_location }
 
       context "item is backorderable" do
         before { bisn.variant.stock_items.update_all backorderable: true }
@@ -15,33 +16,24 @@ describe BackInStockNotificationEmailJob do
         context "for all stock locations" do
           let(:stock_location_params) { {} }
 
-          it "sends the email" do
-            expect { subject }
-              .to change {
-                n = Spree::BackInStockNotification.find(bisn.id)
-                [n.pending?, n.email_sent_count]
-              }
-              .from([true, 0]).to([false, 1])
+          it "calls the mailer job" do
+            expect{ subject }.to have_enqueued_job(BackInStockNotificationMailerJob)
           end
         end
 
         context "for matching stock location name" do
-          let(:stock_location_params) { {name: bisn.stock_location.name} }
+          let(:stock_location_params) { {name: stock_location.name} }
 
-          it "sends the email" do
-            expect { subject }
-              .to change { Spree::BackInStockNotification.find(bisn.id).pending? }
-              .from(true).to(false)
+          it "calls the mailer job" do
+            expect{ subject }.to have_enqueued_job(BackInStockNotificationMailerJob)
           end
         end
 
         context "for matching stock location id" do
           let(:stock_location_params) { {id: bisn.stock_location.id} }
 
-          it "sends the email" do
-            expect { subject }
-              .to change { Spree::BackInStockNotification.find(bisn.id).pending? }
-              .from(true).to(false)
+          it "calls the mailer job" do
+            expect{ subject }.to have_enqueued_job(BackInStockNotificationMailerJob)
           end
         end
 
@@ -49,10 +41,8 @@ describe BackInStockNotificationEmailJob do
           let(:stock_location) { create(:stock_location, name: "New Stock Location" ) }
           let(:stock_location_params) { {name: stock_location.name} }
 
-          it "does not send the email" do
-            expect { subject }
-              .to_not change { Spree::BackInStockNotification.find(bisn.id).pending? }
-              .from(true)
+          it "does not call the mailer job" do
+            expect{ subject }.to_not have_enqueued_job(BackInStockNotificationMailerJob)
           end
         end
       end
@@ -65,13 +55,8 @@ describe BackInStockNotificationEmailJob do
           context "for all stock locations" do
             let(:stock_location_params) { {} }
 
-            it "sends the email" do
-              expect { subject }
-                .to change {
-                  n = Spree::BackInStockNotification.find(bisn.id)
-                  [n.pending?, n.email_sent_count]
-                }
-                .from([true, 0]).to([false, 1])
+            it "calls the mailer job" do
+              expect{ subject }.to have_enqueued_job(BackInStockNotificationMailerJob)
             end
           end
         end
@@ -82,13 +67,8 @@ describe BackInStockNotificationEmailJob do
           context "for all stock locations" do
             let(:stock_location_params) { {} }
 
-            it "sends the email" do
-              expect { subject }
-                .to_not change {
-                  n = Spree::BackInStockNotification.find(bisn.id)
-                  [n.pending?, n.email_sent_count]
-                }
-                .from([true, 0])
+            it "does not call the mailer job" do
+              expect{ subject }.to_not have_enqueued_job(BackInStockNotificationMailerJob)
             end
           end
         end
@@ -103,9 +83,8 @@ describe BackInStockNotificationEmailJob do
         context "for all stock locations" do
           let(:stock_location_params) { {} }
 
-          it "does not send an email" do
-            expect { subject }
-              .to_not change { Spree::BackInStockNotification.find(bisn.id).email_sent_count }
+          it "does not call the mailer job" do
+            expect{ subject }.to_not have_enqueued_job(BackInStockNotificationMailerJob)
           end
         end
       end
