@@ -1,0 +1,8 @@
+<% content_for :page_actions do %>
+  <li id="download-csv">
+    <%= link_to_with_icon 'download', "Download CSV",
+      spree.admin_back_in_stock_notifications_path(format: "csv"),
+      class: 'btn btn-primary'
+    %>
+  </li>
+<% end %>

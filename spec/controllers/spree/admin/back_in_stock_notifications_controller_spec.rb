@@ -38,6 +38,26 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
           end
         end
       end
+
+      context "format CSV" do
+        subject { get :index, params: { format: :csv } }
+
+        let!(:bisn) { create(:back_in_stock_notification) }
+        let(:stock_location) { bisn.stock_location }
+        let(:product) { bisn.product }
+        let(:variant) { bisn.variant }
+
+
+        it "returns the expected CSV contents" do
+          subject
+          expect( CSV.parse(response.body) ).to eq (
+            [
+              ["id",          "product",         "label",         "sku",            "email",         "stock_location",        "country_iso", "locale", "email_sent_count"],
+              ["#{bisn.id}",  "#{product.name}", "Perfect Peach", "#{variant.sku}", "#{bisn.email}", "#{stock_location.name}", "GB",         "en",     "0"]
+            ]
+          )
+        end
+      end
     end
   end
 

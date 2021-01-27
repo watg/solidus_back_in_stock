@@ -1,3 +1,5 @@
+require 'csv'
+
 class Spree::BackInStockNotification < ApplicationRecord
   paginates_per 50
 
@@ -30,5 +32,35 @@ class Spree::BackInStockNotification < ApplicationRecord
 
   def pending?
     email_sent_at.nil?
+  end
+
+  def self.to_csv
+    CSV.generate do |csv|
+      csv << [
+        "id",
+        "product",
+        "label",
+        "sku",
+        "email",
+        "stock_location",
+        "country_iso",
+        "locale",
+        "email_sent_count",
+      ]
+
+      pending.each do |bisn|
+        back_in_stock_notification_values = []
+        back_in_stock_notification_values << bisn.id
+        back_in_stock_notification_values << bisn.product.name
+        back_in_stock_notification_values << bisn.label
+        back_in_stock_notification_values << bisn.variant.sku
+        back_in_stock_notification_values << bisn.email
+        back_in_stock_notification_values << bisn.stock_location.name
+        back_in_stock_notification_values << bisn.country_iso
+        back_in_stock_notification_values << bisn.locale
+        back_in_stock_notification_values << bisn.email_sent_count
+        csv << back_in_stock_notification_values
+      end
+    end
   end
 end
