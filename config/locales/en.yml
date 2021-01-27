@@ -14,3 +14,7 @@ en:
       email:
         subject: Back In Stock!
         go_to_product: SHOP NOW
+
+    admin:
+      tab:
+        back_in_stock: Back in Stock
