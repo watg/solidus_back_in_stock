@@ -40,4 +40,72 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
       end
     end
   end
+
+  describe "#summary" do
+    describe "GET" do
+      subject { get :summary, params: params }
+      let(:params) { {} }
+
+      context "with view rendering" do
+        render_views
+
+        context "with one USA and two UK pending requests" do
+          let!(:usa_stock_location) { create(:stock_location, name: "DmcUsa") }
+          let!(:uk_stock_location) { create(:stock_location, name: "WATG - LDN") }
+
+          context "USA request for one variant and both UK requests for another variant" do
+            let!(:variant_1) { create(:variant, sku: "V1") }
+            let!(:variant_2) { create(:variant, sku: "V2") }
+            let!(:us_back_in_stock_notification) do
+              create(:back_in_stock_notification,
+                variant: variant_1,
+                stock_location: usa_stock_location,
+                email: "customer1@email.com")
+            end
+            let!(:uk_back_in_stock_notification_1) do
+              create(:back_in_stock_notification,
+                variant: variant_2,
+                stock_location: uk_stock_location,
+                email: "customer2@email.com")
+            end
+            let!(:uk_back_in_stock_notification_2) do
+              create(:back_in_stock_notification,
+                variant: variant_2,
+                stock_location: uk_stock_location,
+                email: "customer3@email.com")
+            end
+
+            context "with no filtering" do
+
+              it "returns the expected results" do
+                subject
+                expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
+                  .to eq [[variant_2.sku, 2], [variant_1.sku, 1]]
+              end
+
+              context "order by sku" do
+                let(:params) { {sort_by: :sku} }
+
+                it "returns the expected results ordered by sku" do
+                  subject
+                  expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
+                    .to eq [[variant_1.sku, 1], [variant_2.sku, 2]]
+                end
+              end
+            end
+
+            context "filter by UK stock location" do
+              let(:params) { {stock_location_id: uk_stock_location.id} }
+
+              it "returns the expected results" do
+                subject
+                expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
+                  .to eq [[variant_2.sku, 2]]
+              end
+            end
+          end
+        end
+      end
+    end
+  end
 end
