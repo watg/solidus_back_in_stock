@@ -1,5 +1,6 @@
 
 <% admin_breadcrumb(link_to "Back in stock notifications", spree.admin_back_in_stock_notifications_path) %>
+<% admin_breadcrumb("Requests") %>
 
 <% content_for :page_actions do %>
   <% if false #can?(:create, Spree::BackInStockNotification) %>
@@ -13,6 +14,9 @@
     </li>
   <% end %>
 <% end %>
+
+<%= render "download_button" %>
+<%= render "tabs" %>
 
 <div id="new_back_in_stock_notification"></div>
 
@@ -58,7 +62,7 @@
     </tbody>
   </table>
 
-  <%= paginate @back_in_stock_notifications %>
+  <%= paginate @back_in_stock_notifications, theme: "solidus_admin" %>
 <% else %>
   <div class="no-objects-found">
     No Back in stock notification found.

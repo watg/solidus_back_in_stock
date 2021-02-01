@@ -1,0 +1,10 @@
+<p style="margin-bottom: 20px">
+  Total pending requests: <%= @back_in_stock_notifications.count %><br>
+
+  Variants requested:
+    <%= @back_in_stock_notifications_summary.count %>
+    <% product_count = @back_in_stock_notifications_summary.map{ |variant, count| variant.product_id }.uniq.count %>
+    from <%= product_count %> <%= "product".pluralize(product_count) %><br>
+
+  Number of customers: <%= @back_in_stock_notifications.group(:email).count.count %>
+</p>

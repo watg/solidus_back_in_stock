@@ -1,0 +1,20 @@
+<div class="btn-group" style="margin-bottom:10px;">
+  <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="zoneDropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Stock Location
+    </button>
+    <div class="dropdown-menu" aria-labelledby="zoneDropdownMenuButton">
+      <%= link_to summary_admin_back_in_stock_notifications_path(@filter_params.merge({stock_location_id: nil})), class: "dropdown-item"  do %>
+        Any stock location
+      <% end %>
+      <div class="dropdown-divider"></div>
+      <% @stock_locations.each do |stock_location| %>
+        <%= link_to summary_admin_back_in_stock_notifications_path(@filter_params.merge({stock_location_id: stock_location.id})),
+          class: "dropdown-item", style: "font-size: 11px" do %>
+
+          <%= stock_location.name %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

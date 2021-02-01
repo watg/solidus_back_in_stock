@@ -1,0 +1,13 @@
+<% content_for :tabs do %>
+  <nav>
+    <ul class="tabs" data-hook="admin_back_in_stock_notification_tabs">
+      <%= content_tag :li, class: "fa #{ 'active' if params[:action] == "summary" }" do %>
+        <%= link_to "Summary", spree.summary_admin_back_in_stock_notifications_path %>
+      <% end %>
+
+      <%= content_tag :li, class: "fa #{ 'active' if params[:action] == "index" }" do %>
+        <%= link_to "Requests", spree.admin_back_in_stock_notifications_path %>
+      <% end %>
+    </ul>
+  </nav>
+<% end %>
