@@ -41,7 +41,6 @@ class Spree::BackInStockNotification < ApplicationRecord
         "product",
         "label",
         "sku",
-        "email",
         "stock_location",
         "country_iso",
         "locale",
@@ -54,7 +53,6 @@ class Spree::BackInStockNotification < ApplicationRecord
         back_in_stock_notification_values << bisn.product.name
         back_in_stock_notification_values << bisn.label
         back_in_stock_notification_values << bisn.variant.sku
-        back_in_stock_notification_values << bisn.email
         back_in_stock_notification_values << bisn.stock_location.name
         back_in_stock_notification_values << bisn.country_iso
         back_in_stock_notification_values << bisn.locale
