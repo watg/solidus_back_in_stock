@@ -9,11 +9,14 @@ module Spree
         @back_in_stock_notifications = @back_in_stock_notifications
           .pending
           .order(updated_at: :desc)
-          .page params[:page]
 
         respond_to do |format|
-          format.html
-          format.csv { send_data @back_in_stock_notifications.to_csv }
+          format.html do
+            @back_in_stock_notifications = @back_in_stock_notifications.page(params[:page])
+          end
+          format.csv do
+            send_data @back_in_stock_notifications.to_csv
+          end
         end
       end
 
