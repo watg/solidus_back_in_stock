@@ -8,6 +8,7 @@ module Spree
       def index
         @back_in_stock_notifications = @back_in_stock_notifications
           .pending
+          .includes(:stock_location, variant: :product)
           .order(updated_at: :desc)
 
         respond_to do |format|
