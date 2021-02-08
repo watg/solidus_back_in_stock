@@ -13,12 +13,22 @@ class Spree::BackInStockNotification < ApplicationRecord
 
   scope :pending, -> { where(email_sent_at: nil) }
 
-  scope :in_stock, -> (stock_location = nil) do
+  scope :in_stock, -> (stock_location) do
     joins(variant: :stock_items)
-    .distinct
-    .where(stock_location: stock_location)
-    .where(variant: { spree_stock_items: { stock_location_id: stock_location.id }})
-    .where("count_on_hand > ? OR backorderable = ?", 0, true)
+      .distinct
+      .where(stock_location: stock_location)
+      .where(variant: { spree_stock_items: { stock_location_id: stock_location.id }})
+      .where("count_on_hand > ? OR backorderable = ?", 0, true)
+  end
+
+  scope :ready_to_send_by_email, -> (email, stock_location) do
+    pending
+      .where(email: email, stock_location: stock_location)
+      .in_stock(stock_location)
+  end
+
+  def self.emails_of_ready_to_send(stock_location)
+    pending.in_stock(stock_location).pluck(:email)
   end
 
   def product
