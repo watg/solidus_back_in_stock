@@ -5,11 +5,16 @@ class Spree::BackInStockNotification < ApplicationRecord
 
   belongs_to :user, class_name: 'Spree::User', optional: true
   belongs_to :variant, class_name: 'Spree::Variant', optional: false
+  belongs_to :product, class_name: 'Spree::Product', optional: false
   belongs_to :stock_location, class_name: 'Spree::StockLocation', optional: false
 
   validates_presence_of :label, :email, :country_iso, :locale, :email_sent_count, :variant
   validates :email, 'spree/email' => true, allow_blank: true
   validates_uniqueness_of :variant, scope: [:email]
+
+  before_validation do
+    self.product_id ||= variant.product_id
+  end
 
   scope :pending, -> { where(email_sent_at: nil) }
 
@@ -31,10 +36,6 @@ class Spree::BackInStockNotification < ApplicationRecord
     pending.in_stock(stock_location).pluck(:email)
   end
 
-  def product
-    variant.product
-  end
-
   def stock_count
     sc = variant.stock_items.find_by(stock_location: stock_location)
     sc.backorderable ? '∞' : sc.count_on_hand
@@ -44,13 +45,22 @@ class Spree::BackInStockNotification < ApplicationRecord
     email_sent_at.nil?
   end
 
+  def product_name
+    [variant.product.name, product.name].uniq.join(" - ")
+  end
+
+  def kit?
+    product_id != variant.product_id
+  end
+
   def self.to_csv
     CSV.generate do |csv|
       csv << [
         "id",
         "product",
         "label",
-        "sku",
+        "product_sku",
+        "variant_sku",
         "stock_location",
         "country_iso",
         "locale",
@@ -60,8 +70,9 @@ class Spree::BackInStockNotification < ApplicationRecord
       pending.each do |bisn|
         back_in_stock_notification_values = []
         back_in_stock_notification_values << bisn.id
-        back_in_stock_notification_values << bisn.product.name
+        back_in_stock_notification_values << bisn.product_name
         back_in_stock_notification_values << bisn.label
+        back_in_stock_notification_values << bisn.product.sku
         back_in_stock_notification_values << bisn.variant.sku
         back_in_stock_notification_values << bisn.stock_location.name
         back_in_stock_notification_values << bisn.country_iso

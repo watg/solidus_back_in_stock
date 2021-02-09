@@ -32,7 +32,6 @@
         <th><%=t "spree.language" %></th>
         <th><%=t "spree.stock" %></th>
         <th><%=t "spree.location" %></th>
-        <th><%=t "spree.email_sent" %></th>
         <th class="actions"></th>
       </tr>
     </thead>
@@ -42,12 +41,11 @@
           <td>
             <%= link_to_if (bisn.user && can?(:idit, bisn.user)), bisn.email, admin_user_path(bisn.user || '') %>
           </td>
-          <td><%= link_to_if can?(:edit, bisn.product), "#{bisn.variant.name} - #{bisn.label}", spree.edit_admin_product_path(bisn.product) %></td>
-          <td><%= link_to_if can?(:edit, bisn.variant), bisn.variant.sku, spree.edit_admin_product_variant_path(bisn.product, bisn.variant) %></td>
+          <td><%= link_to_if can?(:edit, bisn.product), "#{bisn.product_name} - #{bisn.label}", spree.edit_admin_product_path(bisn.product) %></td>
+          <td><%= link_to_if can?(:edit, bisn.variant), bisn.variant.sku, spree.edit_admin_product_variant_path(bisn.variant.product, bisn.variant) %></td>
           <td><%= bisn.locale %></td>
           <td><%= bisn.stock_count %></td>
           <td><%= link_to bisn.stock_location.name, spree.edit_admin_stock_location_path(bisn.stock_location) %></td>
-          <td><%= bisn.email_sent_at || "-" %></td>
 
           <td class="actions">
             <% if false #can?(:update, bisn) %>

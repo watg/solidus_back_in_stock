@@ -52,8 +52,8 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
           subject
           expect( CSV.parse(response.body) ).to eq (
             [
-              ["id",          "product",         "label",         "sku",            "stock_location",         "country_iso", "locale", "email_sent_count"],
-              ["#{bisn.id}",  "#{product.name}", "Perfect Peach", "#{variant.sku}", "#{stock_location.name}", "GB",          "en",     "0"]
+              ["id",          "product",              "label",         "product_sku",    "variant_sku",    "stock_location",         "country_iso", "locale", "email_sent_count"],
+              ["#{bisn.id}",  "#{bisn.product_name}", "Perfect Peach", "#{product.sku}", "#{variant.sku}", "#{stock_location.name}", "GB",          "en",     "0"]
             ]
           )
         end

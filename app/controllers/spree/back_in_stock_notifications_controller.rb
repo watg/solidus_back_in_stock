@@ -3,7 +3,7 @@ module Spree
 
     def create
       @back_in_stock_notification = Spree::BackInStockNotification
-        .where(back_in_stock_notification_params.slice(:email, :variant_id))
+        .where(back_in_stock_notification_params.slice(:email, :variant_id, :product_id))
         .where.not(email_sent_at: nil)
         .first_or_initialize(options)
 
@@ -17,7 +17,7 @@ module Spree
     def back_in_stock_notification_params
       @back_in_stock_notification_params ||= params
         .require(:back_in_stock_notification)
-        .permit(:label, :variant_id, :locale, :country_iso, :email, :user_id)
+        .permit(:label, :variant_id, :product_id, :locale, :country_iso, :email, :user_id)
     end
 
     def options

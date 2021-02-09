@@ -7,6 +7,7 @@ RSpec.describe Spree::BackInStockNotificationsController, type: :controller do
       [
         "label",
         "variant_id",
+        "product_id",
         "user_id",
         "stock_location_id",
         "country_iso",
@@ -44,7 +45,7 @@ RSpec.describe Spree::BackInStockNotificationsController, type: :controller do
         allow(controller).to receive(:session).and_return(session)
       end
 
-      context "there are not back in stock notifications" do
+      context "there are no back in stock notifications" do
 
         context "the customer is not signed in" do
           before do
@@ -58,6 +59,7 @@ RSpec.describe Spree::BackInStockNotificationsController, type: :controller do
               {
                 "label"=>"Perfect Peach",
                 "variant_id"=>variant.id,
+                "product_id"=>variant.product.id,
                 "user_id"=>nil,
                 "stock_location_id"=>stock_location.id,
                 "country_iso"=>"US",
@@ -82,6 +84,7 @@ RSpec.describe Spree::BackInStockNotificationsController, type: :controller do
               {
                 "label"=>"Perfect Peach",
                 "variant_id"=>variant.id,
+                "product_id"=>variant.product.id,
                 "user_id"=>user.id,
                 "stock_location_id"=>stock_location.id,
                 "country_iso"=>"US",
@@ -106,6 +109,44 @@ RSpec.describe Spree::BackInStockNotificationsController, type: :controller do
           subject
           expect( assigns(:back_in_stock_notification).errors.messages[:variant] )
             .to eq [I18n.translate("activerecord.errors.models.spree/back_in_stock_notification.attributes.variant.taken")]
+        end
+      end
+
+      context "when a kit product_id is provided" do
+        before do
+          allow(controller).to receive(:current_spree_user).and_return(nil)
+        end
+
+        let(:product) { create(:product) }
+        # ensure the product id is difference to a variant id
+        let(:product_id) { 123 }
+        before { product.update_column :id, product_id }
+        let(:params) do
+          {
+            back_in_stock_notification: {
+              "label"=>"Perfect Peach",
+              "variant_id"=>"#{variant.id}",
+              "product_id"=>"#{product_id}",
+              "email"=>email
+            }
+          }
+        end
+
+        it "saves the product_id" do
+          subject
+          expect( Spree::BackInStockNotification.last.attributes.slice(*stock_notification_attributes) ).to eq (
+            {
+              "label"=>"Perfect Peach",
+              "variant_id"=>variant.id,
+              "product_id"=>product.id,
+              "user_id"=>nil,
+              "stock_location_id"=>stock_location.id,
+              "country_iso"=>"US",
+              "locale"=>"en",
+              "email_sent_at"=>nil,
+              "email_sent_count"=>0
+            }
+          )
         end
       end
     end

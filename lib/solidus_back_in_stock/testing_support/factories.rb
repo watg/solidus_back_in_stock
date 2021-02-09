@@ -10,6 +10,7 @@ FactoryBot.define do
     email_sent_count { 0 }
 
     variant { |v| v.association(:variant) }
+    product { |v| v.association(:product) }
     user { |v| v.association(:user) }
     stock_location { |v| v.association(:stock_location) }
   end

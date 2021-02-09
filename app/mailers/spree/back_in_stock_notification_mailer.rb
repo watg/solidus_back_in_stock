@@ -59,8 +59,7 @@ module Spree
     end
 
     def product_image_link(bisn)
-      line_item = Spree::LineItem.new(variant: bisn.variant)
-      image = WATG::Presenters::LineItem.new(line_item).image
+      image = bisn.product.images.first
       "https:#{image&.attachment(:product)}"
     end
 

@@ -23,12 +23,12 @@
                 <div style="text-align: left;">
                   <span style="font-size:14px">
                     <span style="font-family:arial,helvetica neue,helvetica,sans-serif">
-                      <strong><%= bisn.label %></strong> <%= bisn.variant.name %>
+                      <strong><%= bisn.label %></strong> <%= bisn.product_name %>
                     </span>
                   </span>
                   <br>
                   <span style="font-size:14px">
-                    <strong>Price: </strong><%= bisn.variant.price_in(currency).display_price %>
+                    <strong>Price: </strong><%= bisn.product.price_in(currency).display_price %>
                   </span>
                   <div>
                     <%= link_to product_link, title: t("spree.back_in_stock.email.go_to_product"), target: :_blank do %>
