@@ -11,6 +11,32 @@ RSpec.describe Spree::BackInStockNotification do
           .to change { described_class.count }
           .from(0).to(1)
       end
+
+      context "when no product_id is given" do
+        let!(:variant) { create(:variant) }
+        let(:back_in_stock_notification) { build(:back_in_stock_notification, variant: variant) }
+        before { back_in_stock_notification.product_id = nil }
+
+        it "sets the product_id to the variant product_id" do
+          subject
+          back_in_stock_notification.reload
+          expect( back_in_stock_notification.product_id ).to eq variant.product_id
+        end
+      end
+
+      context "when no product_id is given" do
+        let!(:variant) { create(:variant) }
+        let!(:product) { create(:product) }
+        let(:back_in_stock_notification) { build(:back_in_stock_notification, variant: variant) }
+        before { back_in_stock_notification.product_id = product.id }
+
+        it "sets the product_id to the variant product_id" do
+          subject
+          back_in_stock_notification.reload
+          expect( variant.product_id ).to_not eq product.id
+          expect( back_in_stock_notification.product_id ).to eq product.id
+        end
+      end
     end
 
     context "when the email is missing" do
