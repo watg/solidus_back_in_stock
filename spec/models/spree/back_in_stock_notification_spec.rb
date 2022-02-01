@@ -48,7 +48,7 @@ RSpec.describe Spree::BackInStockNotification do
     end
 
     context "when the email is invalid" do
-      before { back_in_stock_notification.email = "inavalid@email" }
+      before { back_in_stock_notification.email = "inavalid.email" }
 
       it "does not save record" do
         expect{ subject }.to raise_error(ActiveRecord::RecordInvalid)
