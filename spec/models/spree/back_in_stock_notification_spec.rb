@@ -48,7 +48,7 @@ RSpec.describe Spree::BackInStockNotification do
     end
 
     context "when the email is invalid" do
-      before { back_in_stock_notification.email = "inavalid@email" }
+      before { back_in_stock_notification.email = "inavalid.email" }
 
       it "does not save record" do
         expect{ subject }.to raise_error(ActiveRecord::RecordInvalid)
@@ -99,40 +99,66 @@ RSpec.describe Spree::BackInStockNotification do
       back_in_stock_notification.update_column :stock_location_id, stock_location.id
     end
 
-    context "is not backorderable" do
+    context "is not backorderable and inventory is tracked" do
       let(:backorderable) { false }
 
       context "item is in stock" do
-        before do
-          variant.stock_items.update_all count_on_hand: 50, backorderable: backorderable
+        before { variant.stock_items.update_all count_on_hand: 50, backorderable: backorderable }
+
+        context "the product is available" do
+          before { variant.product.update available_on: 1.day.ago }
+
+          it "returns one result" do
+            expect(subject).to eq [back_in_stock_notification]
+          end
+
+          context "the product abailable_on date is in the future" do
+            before { variant.product.update available_on: 1.day.from_now }
+
+            it { is_expected.to eq [] }
+          end
         end
 
-        it "returns one result" do
-          expect(subject).to eq [back_in_stock_notification]
+        context "the product abailable_on date is not set" do
+          before { variant.product.update available_on: 1.day.from_now }
+
+          it { is_expected.to eq [] }
         end
       end
 
       context "item is out of stock" do
-        before do
-          variant.stock_items.update_all count_on_hand: 0, backorderable: backorderable
-        end
+        before { variant.stock_items.update_all count_on_hand: 0, backorderable: backorderable }
 
-        it "returns nothing" do
-          expect(subject).to eq []
-        end
+        it { is_expected.to eq [] }
       end
     end
 
-    context "is backorderable" do
-      let(:backorderable) { true }
+    context "the product is available" do
+      before { variant.product.update available_on: 1.day.ago }
 
-      context "item is out of stock" do
-        before do
-          variant.stock_items.update_all count_on_hand: 0, backorderable: backorderable
+      context "is backorderable" do
+        let(:backorderable) { true }
+
+        context "item is out of stock" do
+          before { variant.stock_items.update_all count_on_hand: 0, backorderable: backorderable }
+
+          it "returns one result" do
+            expect(subject).to eq [back_in_stock_notification]
+          end
         end
+      end
 
-        it "returns one result" do
-          expect(subject).to eq [back_in_stock_notification]
+      context "inventory is not tracked and is not backorderable" do
+        let(:backorderable) { false }
+
+        before { variant.update track_inventory: false }
+
+        context "item is out of stock" do
+          before { variant.stock_items.update_all count_on_hand: 0, backorderable: backorderable }
+
+          it "returns one result" do
+            expect(subject).to eq [back_in_stock_notification]
+          end
         end
       end
     end

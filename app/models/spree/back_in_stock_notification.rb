@@ -19,11 +19,15 @@ class Spree::BackInStockNotification < ApplicationRecord
   scope :pending, -> { where(email_sent_at: nil) }
 
   scope :in_stock, -> (stock_location) do
-    joins(variant: :stock_items)
-      .distinct
+    available_variants = joins(variant: [:stock_items, :product])
       .where(stock_location: stock_location)
-      .where(variant: { spree_stock_items: { stock_location_id: stock_location.id }})
-      .where("count_on_hand > ? OR backorderable = ?", 0, true)
+      .where(spree_stock_items: {stock_location_id: stock_location.id })
+      .merge(Spree::Product.available)
+      .distinct
+
+    available_variants
+      .where("spree_stock_items.count_on_hand > ? OR spree_stock_items.backorderable = ?", 0, true)
+      .or(available_variants.where(spree_variants: {track_inventory: false}))
   end
 
   scope :ready_to_send_by_email, -> (email, stock_location) do
