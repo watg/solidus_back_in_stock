@@ -6,12 +6,16 @@ class BackInStockNotificationEmailJob < ApplicationJob
 
     stock_locations.each do |stock_location|
       emails_of_ready_to_send(stock_location).each do |email|
-        BackInStockNotificationMailerJob.perform_later(email: email, stock_location: stock_location)
+        perform_back_in_stock_notification(email: email, stock_location: stock_location)
       end
     end
   end
 
   private
+
+  def perform_back_in_stock_notification(email: email, stock_location: stock_location)
+    BackInStockNotificationMailerJob.perform_later(email: email, stock_location: stock_location)
+  end
 
   def stock_locations
     Spree::StockLocation.where(@stock_location_params)
