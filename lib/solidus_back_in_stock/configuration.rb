@@ -5,6 +5,8 @@ module SolidusBackInStock
     # Define here the settings for this extensions, e.g.:
     #
     # attr_accessor :my_setting
+
+    attr_accessor :back_in_stock_threshold
   end
 
   class << self

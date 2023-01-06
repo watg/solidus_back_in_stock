@@ -7,7 +7,7 @@ module SolidusBackInStock
       source_root File.expand_path('templates', __dir__)
 
       def copy_initializer
-        # template 'initializer.rb', 'config/initializers/solidus_back_in_stock.rb'
+        template 'initializer.rb', 'config/initializers/solidus_back_in_stock.rb'
       end
 
       def add_javascripts

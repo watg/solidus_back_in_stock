@@ -26,7 +26,7 @@ class Spree::BackInStockNotification < ApplicationRecord
       .distinct
 
     available_variants
-      .where("spree_stock_items.count_on_hand > ? OR spree_stock_items.backorderable = ?", 0, true)
+      .where("spree_stock_items.count_on_hand > ? OR spree_stock_items.backorderable = ?", SolidusBackInStock.config.back_in_stock_threshold, true)
       .or(available_variants.where(spree_variants: {track_inventory: false}))
   end
 
