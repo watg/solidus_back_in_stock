@@ -40,7 +40,7 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
       end
 
       context "format CSV" do
-        subject { get :index, params: { format: :csv } }
+        subject { get :index, params: {format: :csv} }
 
         let!(:bisn) { create(:back_in_stock_notification) }
         let(:stock_location) { bisn.stock_location }
@@ -99,8 +99,7 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
 
               it "returns the expected results" do
                 subject
-                expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
-                  .to eq [[variant_2.sku, 2], [variant_1.sku, 1]]
+                expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_2, 2], [variant_1, 1]]
               end
 
               context "order by sku" do
@@ -108,8 +107,7 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
 
                 it "returns the expected results ordered by sku" do
                   subject
-                  expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
-                    .to eq [[variant_1.sku, 1], [variant_2.sku, 2]]
+                  expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_1, 1], [variant_2, 2]]
                 end
               end
             end
@@ -119,8 +117,7 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
 
               it "returns the expected results" do
                 subject
-                expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
-                  .to eq [[variant_2.sku, 2]]
+                expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_2, 2]]
               end
             end
 
