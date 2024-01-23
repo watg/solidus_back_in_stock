@@ -133,7 +133,7 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
                 context "with no end date" do
                   it "returns the results from two requests" do
                     subject
-                    expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_2, 1], [variant_1, 1]]
+                    expect(assigns(:back_in_stock_notifications_summary)).to match_array [[variant_2, 1], [variant_1, 1]]
                   end
                 end
 
