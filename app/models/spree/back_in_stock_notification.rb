@@ -36,6 +36,14 @@ class Spree::BackInStockNotification < ApplicationRecord
       .in_stock(stock_location)
   end
 
+  def self.ransackable_associations(auth_object = nil)
+    %w[product stock_location user variant]
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[stock_location_id updated_at]
+  end
+
   def self.emails_of_ready_to_send(stock_location)
     pending.in_stock(stock_location).pluck(:email)
   end
