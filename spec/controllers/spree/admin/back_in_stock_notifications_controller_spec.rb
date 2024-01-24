@@ -47,13 +47,16 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
         let(:product) { bisn.product }
         let(:variant) { bisn.variant }
 
+        before do
+          bisn.update_column :updated_at, Date.parse("2023-01-02")
+        end
 
         it "returns the expected CSV contents" do
           subject
           expect( CSV.parse(response.body) ).to eq (
             [
-              ["id",          "product",              "label",         "product_sku",    "variant_sku",    "stock_location",         "country_iso", "locale", "email_sent_count"],
-              ["#{bisn.id}",  "#{bisn.product_name}", "Perfect Peach", "#{product.sku}", "#{variant.sku}", "#{stock_location.name}", "GB",          "en",     "0"]
+              ["id",          "product",              "label",         "product_sku",    "variant_sku",    "stock_location",         "country_iso", "locale", "email_sent_count", "request_date"],
+              ["#{bisn.id}",  "#{bisn.product_name}", "Perfect Peach", "#{product.sku}", "#{variant.sku}", "#{stock_location.name}", "GB",          "en",     "0", "2023-01-02"]
             ]
           )
         end

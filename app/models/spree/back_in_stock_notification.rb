@@ -77,6 +77,7 @@ class Spree::BackInStockNotification < ApplicationRecord
         "country_iso",
         "locale",
         "email_sent_count",
+        "request_date"
       ]
 
       pending.each do |bisn|
@@ -90,6 +91,7 @@ class Spree::BackInStockNotification < ApplicationRecord
         back_in_stock_notification_values << bisn.country_iso
         back_in_stock_notification_values << bisn.locale
         back_in_stock_notification_values << bisn.email_sent_count
+        back_in_stock_notification_values << bisn.updated_at.strftime("%Y-%m-%d")
         csv << back_in_stock_notification_values
       end
     end
