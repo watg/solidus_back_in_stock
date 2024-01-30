@@ -12,14 +12,16 @@
     <thead>
       <tr data-hook="back_in_stock_notification_header">
         <th><%=t "spree.product" %></th>
-        <th><%= link_to "SKU #{'▼' if params[:sort_by] == 'sku'}", summary_admin_back_in_stock_notifications_path(sort_by: :sku) %></th>
-        <th><%= link_to "Count #{'▼' unless params[:sort_by] == 'sku'}", summary_admin_back_in_stock_notifications_path(sort_by: :count) %></th>
+        <th><%=t "spree.options" %></th>
+        <th><%= link_to "SKU #{'▼' if params[:sort_by] == 'sku'}", summary_admin_back_in_stock_notifications_path(@filter_params.merge(sort_by: :sku)) %></th>
+        <th><%= link_to "Count #{'▼' unless params[:sort_by] == 'sku'}", summary_admin_back_in_stock_notifications_path(@filter_params.merge(sort_by: :count)) %></th>
       </tr>
     </thead>
     <tbody>
       <% @back_in_stock_notifications_summary.each do |variant, count| %>
         <tr class="spree_back_in_stock_notifications_summary" data-hook="back_in_stock_notifications_summary_row">
           <td><%= link_to_if can?(:edit, variant.product), "#{variant.name}", spree.edit_admin_product_path(variant.product) %></td>
+          <td><%= variant.options_text %></td>
           <td><%= link_to_if can?(:edit, variant), variant.sku, spree.edit_admin_product_variant_path(variant.product, variant) %></td>
           <td><%= count %></td>
         </tr>
@@ -30,6 +32,5 @@
 <% else %>
   <div class="no-objects-found">
     There are no notifications to summarise
-    <%= "for this stock location" if params[:stock_location_id] %>.
   </div>
 <% end %>

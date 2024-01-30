@@ -36,6 +36,14 @@ class Spree::BackInStockNotification < ApplicationRecord
       .in_stock(stock_location)
   end
 
+  def self.ransackable_associations(auth_object = nil)
+    %w[product stock_location user variant]
+  end
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[stock_location_id updated_at]
+  end
+
   def self.emails_of_ready_to_send(stock_location)
     pending.in_stock(stock_location).pluck(:email)
   end
@@ -69,6 +77,7 @@ class Spree::BackInStockNotification < ApplicationRecord
         "country_iso",
         "locale",
         "email_sent_count",
+        "request_date"
       ]
 
       pending.each do |bisn|
@@ -82,6 +91,7 @@ class Spree::BackInStockNotification < ApplicationRecord
         back_in_stock_notification_values << bisn.country_iso
         back_in_stock_notification_values << bisn.locale
         back_in_stock_notification_values << bisn.email_sent_count
+        back_in_stock_notification_values << bisn.updated_at.strftime("%Y-%m-%d")
         csv << back_in_stock_notification_values
       end
     end

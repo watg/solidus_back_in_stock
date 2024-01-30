@@ -3,7 +3,6 @@ module Spree
     class BackInStockNotificationsController < ResourceController
       before_action :set_filter_params, only: :summary
       before_action :set_stock_locations, only: :summary
-      before_action :set_back_in_stock_notifications, only: :summary
 
       def index
         @back_in_stock_notifications = @back_in_stock_notifications
@@ -22,8 +21,10 @@ module Spree
       end
 
       def summary
-        @back_in_stock_notifications_summary = Spree::BackInStockNotification.pending
-          .where(stock_location_option)
+        @search = Spree::BackInStockNotification.pending.ransack(params[:q])
+        @back_in_stock_notifications = @search.result
+
+        @back_in_stock_notifications_summary = @search.result
           .group(:variant).count
           .map { |v,n| [v, n] }
           .sort_by { |x| sort_value(*x) }
@@ -42,19 +43,11 @@ module Spree
       end
 
       def set_filter_params
-        @filter_params = params.permit(:sort_by, :stock_location_id)
-      end
-
-      def stock_location_option
-        @stock_location_option || params[:stock_location_id] ? {stock_location_id: params[:stock_location_id]} : {}
+        @filter_params = params.permit(:sort_by, q: [:stock_location_id_eq, :updated_at_gt, :updated_at_lt])
       end
 
       def set_stock_locations
         @stock_locations = Spree::StockLocation.select(:id, :name)
-      end
-
-      def set_back_in_stock_notifications
-        @back_in_stock_notifications = Spree::BackInStockNotification.pending.where(stock_location_option)
       end
     end
   end

@@ -40,20 +40,23 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
       end
 
       context "format CSV" do
-        subject { get :index, params: { format: :csv } }
+        subject { get :index, params: {format: :csv} }
 
         let!(:bisn) { create(:back_in_stock_notification) }
         let(:stock_location) { bisn.stock_location }
         let(:product) { bisn.product }
         let(:variant) { bisn.variant }
 
+        before do
+          bisn.update_column :updated_at, Date.parse("2023-01-02")
+        end
 
         it "returns the expected CSV contents" do
           subject
           expect( CSV.parse(response.body) ).to eq (
             [
-              ["id",          "product",              "label",         "product_sku",    "variant_sku",    "stock_location",         "country_iso", "locale", "email_sent_count"],
-              ["#{bisn.id}",  "#{bisn.product_name}", "Perfect Peach", "#{product.sku}", "#{variant.sku}", "#{stock_location.name}", "GB",          "en",     "0"]
+              ["id",          "product",              "label",         "product_sku",    "variant_sku",    "stock_location",         "country_iso", "locale", "email_sent_count", "request_date"],
+              ["#{bisn.id}",  "#{bisn.product_name}", "Perfect Peach", "#{product.sku}", "#{variant.sku}", "#{stock_location.name}", "GB",          "en",     "0", "2023-01-02"]
             ]
           )
         end
@@ -99,8 +102,7 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
 
               it "returns the expected results" do
                 subject
-                expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
-                  .to eq [[variant_2.sku, 2], [variant_1.sku, 1]]
+                expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_2, 2], [variant_1, 1]]
               end
 
               context "order by sku" do
@@ -108,19 +110,46 @@ RSpec.describe Spree::Admin::BackInStockNotificationsController, type: :controll
 
                 it "returns the expected results ordered by sku" do
                   subject
-                  expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
-                    .to eq [[variant_1.sku, 1], [variant_2.sku, 2]]
+                  expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_1, 1], [variant_2, 2]]
                 end
               end
             end
 
             context "filter by UK stock location" do
-              let(:params) { {stock_location_id: uk_stock_location.id} }
+              let(:params) { {q: {stock_location_id_eq: uk_stock_location.id}} }
 
               it "returns the expected results" do
                 subject
-                expect( assigns(:back_in_stock_notifications_summary).map{|v,c| [v.sku, c]} )
-                  .to eq [[variant_2.sku, 2]]
+                expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_2, 2]]
+              end
+            end
+
+            context "requested 0, 2, and 4 days ago" do
+              before do
+                uk_back_in_stock_notification_1.update_column :updated_at, 2.days.ago
+                uk_back_in_stock_notification_2.update_column :updated_at, 4.days.ago
+              end
+
+              context "filter by start date of three days ago" do
+                let(:params) { {q: {updated_at_gt: 3.days.ago.strftime("%Y-%m-%d")}} }
+
+                context "with no end date" do
+                  it "returns the results from two requests" do
+                    subject
+                    expect(assigns(:back_in_stock_notifications_summary)).to match_array [[variant_2, 1], [variant_1, 1]]
+                  end
+                end
+
+                context "with an end date of yesterday" do
+                  before do
+                    params[:q][:updated_at_lt] = 1.day.ago.strftime("%Y-%m-%d")
+                  end
+
+                  it "returns the results from 1 request" do
+                    subject
+                    expect(assigns(:back_in_stock_notifications_summary)).to eq [[variant_2, 1]]
+                  end
+                end
               end
             end
           end
